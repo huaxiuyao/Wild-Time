@@ -53,7 +53,7 @@ class HuffPostBase(Dataset):
             # Store input dim
             num_examples = len(self.datasets[year][self.mode]['category'])
             cumulative_batch_size += min(self.mini_batch_size, num_examples)
-            if args.method in ['toe']:
+            if args.method in ['erm']:
                 self.input_dim.append(cumulative_batch_size)
             else:
                 self.input_dim.append(min(self.mini_batch_size, num_examples))

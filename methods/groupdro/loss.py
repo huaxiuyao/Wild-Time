@@ -1,10 +1,4 @@
-import ipdb
-import matplotlib.pyplot as plt
 import torch
-import torch.nn.functional as F
-from torch.utils.data import DataLoader
-import numpy as np
-
 
 class LossComputer:
     def __init__(self, dataset, criterion, is_robust, alpha=0.2, gamma=0.1, adj=None, min_var_weight=0, step_size=0.01,

@@ -11,7 +11,6 @@ from torch import cuda
 
 from data.utils import Mode
 from dataloaders import FastDataLoader, InfiniteDataLoader
-from methods.memo import adapt_single
 from methods.utils import prepare_data, forward_pass, plot_accuracy
 
 device = 'cuda' if cuda.is_available() else 'cpu'
@@ -58,7 +57,6 @@ class BaseTrainer:
         self.mix_alpha = args.mix_alpha
         self.mini_batch_size = args.mini_batch_size
         self.num_workers = args.num_workers
-        self.test_time = args.test_time
         self.test_update_iter = args.test_update_iter
         self.test_batch_size = args.test_batch_size
         self.base_trainer_str = self.get_base_trainer_str()
@@ -84,10 +82,7 @@ class BaseTrainer:
             base_trainer_str += f'-mixup-mix_alpha={self.mix_alpha}'
         if self.cut_mix:
             base_trainer_str += f'-cut_mix'
-        if self.test_time:
-            base_trainer_str += f'-test_update_iter={self.test_update_iter}-test_batch_size={self.test_batch_size}'
         base_trainer_str += f'-offline'
-        # TODO (only after paper submisssion, when cleaning code), remove the above line
         return base_trainer_str
 
     def train_step(self, dataloader):
@@ -114,9 +109,6 @@ class BaseTrainer:
 
     def train_online(self):
         for i, t in enumerate(self.train_dataset.ENV[:-1]):
-            # Include the below code to train/load model checkpoints only at the last possible time step
-            # if not i == len(self.train_dataset.ENV[:-1]) - 1:
-            #     continue
             if self.args.offline and t == self.split_time:
                 break
             if self.args.load_model and self.model_path_exists(t):
@@ -129,7 +121,7 @@ class BaseTrainer:
                                                     num_workers=self.num_workers, collate_fn=self.collate_fn)
                 self.train_step(train_dataloader)
                 self.save_model(t)
-                if self.args.method in ['coral', 'groupdro', 'irm', 'toe']:
+                if self.args.method in ['coral', 'groupdro', 'irm', 'erm']:
                     self.train_dataset.update_historical(i + 1, data_del=True)
 
     def network_evaluation(self, test_time_dataloader):
@@ -142,11 +134,8 @@ class BaseTrainer:
             else:
                 x, y = sample
             x, y = prepare_data(x, y, str(self.eval_dataset))
-            if self.args.regression and self.args.dataset == 'weather':
+            if self.args.regression and self.args.dataset == 'precipitation':
                 y = y.to(torch.float)
-            if self.test_time and str(self.eval_dataset) in ['clear', 'fmow', 'yearbook']:
-                for idx in range(x.shape[0]):
-                    adapt_single(self.network, x[idx], self.optimizer, self.test_update_iter, self.test_batch_size)
 
             with torch.no_grad():
                 logits_test = self.network(x)
@@ -175,14 +164,11 @@ class BaseTrainer:
         else:
             pred_all = np.array(pred_all)
             y_all = np.array(y_all)
-            if self.args.dataset == 'weather':
+            if self.args.dataset == 'precipitation':
                 y_all = y_all.squeeze()
-            if self.args.dataset == 'weather' and self.eval_metric == 'f1':
+            if self.args.dataset == 'precipitation' and self.eval_metric == 'f1':
                 acc = metrics.f1_score(y_all, pred_all, average='macro')
             elif self.args.dataset == 'mimic' and self.args.prediction_type in ['mortality']:
-                # precision, recall, _ = metrics.precision_recall_curve(y_all, pred_all)
-                # acc = metrics.auc(recall, precision)
-                # acc = metrics.balanced_accuracy_score(y_all, pred_all)
                 acc = metrics.roc_auc_score(y_all, pred_all)
             else:
                 correct = (pred_all == y_all).sum().item()
@@ -218,9 +204,6 @@ class BaseTrainer:
     def evaluate_online(self):
         end = len(self.eval_dataset.ENV) - self.eval_next_timesteps
         for i, t in enumerate(self.eval_dataset.ENV[:end]):
-            # Include the below code to evaluate only at the last possible time step
-            # if not i == end - 1:
-            #     continue
             self.load_model(t)
             avg_acc, worst_acc, best_acc = self.evaluate(i + 1)
             self.task_accuracies[t] = avg_acc
@@ -262,7 +245,7 @@ class BaseTrainer:
         print('all OOD accuracies', acc_all)
 
     def run_offline(self):
-        if self.args.method in ['agem', 'ewc', 'foml', 'ft', 'ftml', 'si', 'toe-ft']:
+        if self.args.method in ['agem', 'ewc', 'ft', 'si']:
             self.train_online()
             self.evaluate_offline()
         else:
@@ -292,13 +275,6 @@ class BaseTrainer:
                     else:
                         self.train_step(train_id_dataloader)
                         self.save_model(t)
-
-                    # Check train accuracy
-                    # test_id_dataloader = FastDataLoader(dataset=self.train_dataset,
-                    #                                     batch_size=self.mini_batch_size,
-                    #                                     num_workers=self.num_workers, collate_fn=self.collate_fn)
-                    # acc = self.network_evaluation(test_id_dataloader)
-                    # print('Train accuracy:', acc)
 
                     # Evaluate in-distribution
                     self.train_dataset.mode = Mode.TEST_ID

@@ -10,7 +10,7 @@ def prepare_data(x, y, dataset_name: str):
         x[0] = x[0].cuda()
         x[1] = x[1].cuda()
         y = y.cuda()
-    elif dataset_name == 'weather':
+    elif dataset_name == 'precipitation':
         x['categorical'] = x['categorical'].cuda()
         x['continuous'] = x['continuous'].cuda()
         y = y.cuda()
@@ -20,7 +20,7 @@ def prepare_data(x, y, dataset_name: str):
         x = x.to(dtype=torch.int64).cuda()
         if len(y.shape) > 1:
             y = y.squeeze(1).cuda()
-    elif dataset_name in ['clear', 'fmow', 'yearbook']:
+    elif dataset_name in ['fmow', 'yearbook']:
         x = x.cuda()
         if len(y.shape) > 1:
             y = y.squeeze(1).cuda()
@@ -35,7 +35,7 @@ def forward_pass(x, y, dataset, network, criterion, use_lisa: bool, use_mixup: b
                                 num_classes=dataset.num_classes, time_idx=dataset.current_time,
                                 cut_mix=cut_mix, embedding=network.model[0])
             logits = network.model[1](sel_x)
-        elif str(dataset) in ['weather']:
+        elif str(dataset) in ['precipitation']:
             x = network.net(x)
             sel_x, sel_y = lisa(x, y, dataset=dataset, mix_alpha=mix_alpha,
                                 num_classes=dataset.num_classes, time_idx=dataset.current_time,
@@ -81,7 +81,7 @@ def forward_pass(x, y, dataset, network, criterion, use_lisa: bool, use_mixup: b
             y_a = y_a.float()
             y_b = y_b.float()
             logits = network(x).squeeze(1).float()
-        elif str(dataset) in ['weather']:
+        elif str(dataset) in ['precipitation']:
             x = network.net(x)
             x, y_a, y_b, lam = mixup_data(x, y, mix_alpha=mix_alpha)
             y_a = y_a.squeeze(1)
@@ -99,10 +99,10 @@ def forward_pass(x, y, dataset, network, criterion, use_lisa: bool, use_mixup: b
         if str(dataset) in ['drug']:
             logits = logits.squeeze().double()
             y = y.squeeze().double()
-        elif str(dataset) in ['arxiv', 'clear', 'fmow', 'huffpost', 'weather', 'yearbook']:
+        elif str(dataset) in ['arxiv', 'fmow', 'huffpost', 'precipitation', 'yearbook']:
             if len(y.shape) > 1:
                 y = y.squeeze(1)
-            if str(dataset) in ['weather'] and type(criterion) == torch.nn.modules.loss.MSELoss:
+            if str(dataset) in ['precipitation'] and type(criterion) == torch.nn.modules.loss.MSELoss:
                 logits = logits.squeeze(1)
                 y = y.float()
         loss = criterion(logits, y)

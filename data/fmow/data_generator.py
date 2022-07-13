@@ -51,7 +51,7 @@ class FMoWBase(Dataset):
             count = len(self.datasets[year][self.mode]['labels'])
             print('year:', year, 'count', count)
             cumulative_batch_size += min(args.mini_batch_size, count)
-            if args.method in ['toe']:
+            if args.method in ['erm']:
                 self.input_dim.append((cumulative_batch_size, 3, 32, 32))
             else:
                 self.input_dim.append((min(args.mini_batch_size, count), 3, 32, 32))

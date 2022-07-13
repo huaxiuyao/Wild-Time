@@ -55,12 +55,6 @@ class DeepCORAL(BaseTrainer):
             for i_group in range(n_groups_per_batch):
                 for j_group in range(i_group + 1, n_groups_per_batch):
                     coral_loss += self.coral_penalty(logits[group_indices[i_group]].squeeze(0), logits[group_indices[j_group]].squeeze(0))
-                    # if torch.isnan(coral_loss).any():
-                    #     import pdb; pdb.set_trace()
-                    #     print(logits[group_indices[i_group]])
-                    #     print(logits[group_indices[j_group]])
-                    #     print(self.coral_penalty(logits[group_indices[i_group]], logits[group_indices[j_group]]))
-                    #     break
             if n_groups_per_batch > 1:
                 coral_loss /= (n_groups_per_batch * (n_groups_per_batch-1) / 2) # get the mean penalty
 

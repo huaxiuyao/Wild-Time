@@ -77,7 +77,7 @@ class AGEM(BaseTrainer):
         sample = next(iter(dataloader))
         cur_x, cur_y = sample
         cur_x, cur_y = prepare_data(cur_x, cur_y, str(self.train_dataset))
-        if str(self.train_dataset) == 'weather':
+        if str(self.train_dataset) == 'precipitation':
             cur_x = [cur_x['categorical'], cur_x['continuous']]
         elif str(self.train_dataset) == 'mimic':
             cur_x = [(code, type) for (code, type) in zip(cur_x[0], cur_x[1])]
@@ -118,7 +118,7 @@ class AGEM(BaseTrainer):
                     buf_labels = buf_data[2]
                 else:
                     buf_inputs, buf_labels = buf_data
-                if str(self.train_dataset) == 'weather':
+                if str(self.train_dataset) == 'precipitation':
                     categorical = buf_inputs[0].cuda()
                     continuous = buf_inputs[1].cuda()
                     buf_inputs = {}

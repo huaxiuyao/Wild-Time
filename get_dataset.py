@@ -7,14 +7,6 @@ def get_dataset(dataset: str, args):
             from data.arxiv.data_generator import ArXiv
             return ArXiv(args)
 
-    elif dataset == 'clear':
-        if args.method in ['coral', 'groupdro', 'irm']:
-            from data.clear.data_generator import CLEARGroup
-            return CLEARGroup(args)
-        else:
-            from data.clear.data_generator import CLEAR
-            return CLEAR(args)
-
     elif dataset == 'drug':
         if args.method in ['coral', 'groupdro', 'irm']:
             from data.drug.data_generator import TdcDtiDgGroup
@@ -41,19 +33,19 @@ def get_dataset(dataset: str, args):
 
     elif dataset == 'mimic':
         if args.method in ['coral', 'groupdro', 'irm']:
-            from data.MIMIC.data_generator import MIMICGroup
+            from data.mimic.data_generator import MIMICGroup
             return MIMICGroup(args)
         else:
-            from data.MIMIC.data_generator import MIMIC
+            from data.mimic.data_generator import MIMIC
             return MIMIC(args)
 
-    elif dataset == 'weather':
+    elif dataset == 'precipitation':
         if args.method in ['coral', 'groupdro', 'irm']:
-            from data.weather.data_generator import WeatherGroup
-            return WeatherGroup(args)
+            from data.precipitation.data_generator import PrecipitationGroup
+            return PrecipitationGroup(args)
         else:
-            from data.weather.data_generator import Weather
-            return Weather(args)
+            from data.precipitation.data_generator import Precipitation
+            return Precipitation(args)
 
     elif dataset == 'yearbook':
         if args.method in ['coral', 'groupdro', 'irm']:

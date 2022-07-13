@@ -127,9 +127,9 @@ class TdcDtiDgBase(data.Dataset):
             self.datasets[i][Mode.TEST_ID] = df_data.loc[idxs[num_train_samples:], :].reset_index()
             self.datasets[i][Mode.TEST_OOD] = df_data.reset_index()
 
-        with open('/iris/u/huaxiu/Data/TDC_OOD/drug_preprocessed.pkl','wb') as f:
+        with open('drug_preprocessed.pkl','wb') as f:
             pickle.dump(self.datasets, f)
 
 
 if __name__ == '__main__':
-    TdcDtiDgBase('/iris/u/huaxiu/Data/TDC_OOD')
+    TdcDtiDgBase('TDC_OOD')

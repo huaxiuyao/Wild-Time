@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch
 from networks.mimic_tokenizer import MIMICTokenizer
 import sys
-sys.path.append('/iris/u/huaxiu/Temporal_Robustness/archived/tl4h_eicu')
+sys.path.append('../tl4h_eicu')
 
 
 class Attention(nn.Module):

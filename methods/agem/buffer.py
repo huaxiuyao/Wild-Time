@@ -73,10 +73,6 @@ class Buffer:
                         tensor_list = [torch.zeros((self.buffer_size,
                                                     *a.shape[1:]), dtype=typ, device=self.device) for a in attr]
                     setattr(self, attr_str, tensor_list)
-                # elif isinstance(attr, dict):
-                #     tensor_list = [torch.zeros((self.buffer_size,
-                #                                         *a.shape[1:]), dtype=typ, device=self.device) for a in attr.values()]
-                #     setattr(self, attr_str, tensor_list)
                 else:
                     setattr(self, attr_str, torch.zeros((self.buffer_size,
                                                          *attr.shape[1:]), dtype=typ, device=self.device))
@@ -160,29 +156,6 @@ class Buffer:
                 return (torch.tensor(choice).to(self.device),) + ret_tuple
 
             return ret_tuple
-
-        # elif isinstance(self.examples, dict):
-        #     batch_size = self.examples.values[0].shape[0]
-        #     if size > min(self.num_seen_examples, batch_size):
-        #         size = min(self.num_seen_examples, batch_size)
-        #
-        #     choice = np.random.choice(min(self.num_seen_examples, batch_size), size=size, replace=False)
-        #     if transform is None: transform = lambda x: x
-        #     ret_tuple = ()
-        #     for input in self.examples:
-        #         ret_tuple += (torch.stack([transform(ee.cpu()) for ee in input[choice]]).to(self.device),)
-        #     for attr_str in self.attributes[1:]:
-        #         if hasattr(self, attr_str):
-        #             attr = getattr(self, attr_str)
-        #             ret_tuple += (attr[choice],)
-        #
-        #     if not return_index:
-        #         return ret_tuple
-        #     else:
-        #         return (torch.tensor(choice).to(self.device),) + ret_tuple
-        #
-        #     return ret_tuple
-
         else:
             if size > min(self.num_seen_examples, self.examples.shape[0]):
                 size = min(self.num_seen_examples, self.examples.shape[0])

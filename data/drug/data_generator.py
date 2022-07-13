@@ -92,8 +92,6 @@ class TdcDtiDgBase(data.Dataset):
         if args.data_dir is None:
             raise ValueError('Data directory not specified!')
 
-        # self.index_mapping = {}
-
         for i in self.ENV:
             if i != 2019:
                 start_idx = end_idx
@@ -102,18 +100,10 @@ class TdcDtiDgBase(data.Dataset):
                 start_idx = 0
                 end_idx = len(self.datasets[i][self.mode])
             self.task_idxs[i]={}
-            # self.index_mapping[i]={}
 
             self.task_idxs[i][self.mode] = [start_idx, end_idx]
 
-            # self.index_mapping[i][self.mode] = {idx: value for idx, value in enumerate(self.datasets[i][self.mode].index.values)}
-
         self.datasets_copy = deepcopy(self.datasets)
-        # total_samples = 0
-        # for i in self.ENV:
-        #     total_samples += len(self.datasets[i][Mode.TEST_OOD].index)
-        # print('total', total_samples)
-
 
     def update_historical(self, idx, data_del=False):
         time = self.ENV[idx]
@@ -130,7 +120,6 @@ class TdcDtiDgBase(data.Dataset):
         if time >= K:
             last_K_timesteps = [self.datasets_copy[time - i][self.mode] for i in range(1, K + 1)]
             self.datasets[time][self.mode] = pd.concat(last_K_timesteps)
-            # self.index_mapping[time][self.mode] = {idx: value for idx, value in enumerate(self.datasets[time][self.mode].index.values)}
             del self.datasets[time - 1][self.mode]
         else:
             self.update_historical(time)

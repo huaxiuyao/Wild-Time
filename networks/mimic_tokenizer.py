@@ -1,13 +1,13 @@
 import os
+import sys
 from typing import List
 
 import ipdb
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-from networks.mimic_vocab import Vocabulary
+from networks.mimic_vocab import Vocabulary, build_vocab_mimic
 import pickle
-
 
 def to_index(sequence, vocab, prefix='', suffix=''):
     """ convert code to index """
@@ -19,12 +19,16 @@ def to_index(sequence, vocab, prefix='', suffix=''):
 
 class MIMICTokenizer:
     def __init__(self):
+        build_vocab_mimic()
+        self.vocab_dir = '../Data/MIMIC/vocab.pkl'
+        if not os.path.exists(self.vocab_dir):
+            build_vocab_mimic()
         self.code_vocabs, self.code_vocabs_size = self._load_code_vocabs()
         self.type_vocabs, self.type_vocabs_size = self._load_type_vocabs()
 
     def _load_code_vocabs(self):
-        vocab_dir = '/iris/u/huaxiu/Data/MIMIC/vocab.pkl'
-        vocabs = pickle.load(open(vocab_dir, 'rb'))
+
+        vocabs = pickle.load(open(self.vocab_dir, 'rb'))
         vocabs_size = len(vocabs)
         return vocabs, vocabs_size
 

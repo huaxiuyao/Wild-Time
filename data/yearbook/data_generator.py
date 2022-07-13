@@ -52,7 +52,7 @@ class YearbookBase(Dataset):
                 self.class_id_list[classid][i] = sel_idx
 
             cumulative_batch_size += min(self.mini_batch_size, self.num_examples[i])
-            if args.method in ['toe']:
+            if args.method in ['erm']:
                 self.input_dim.append((cumulative_batch_size, 3, 32, 32))
             else:
                 self.input_dim.append((min(self.mini_batch_size, self.num_examples[i]), 3, 32, 32))

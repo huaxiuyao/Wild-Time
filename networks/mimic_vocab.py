@@ -1,4 +1,6 @@
 import pickle
+import sys
+sys.path.append('../Wild-Time/data/mimic')
 
 class Vocabulary(object):
 
@@ -23,7 +25,7 @@ class Vocabulary(object):
         return len(self.word2idx)
 
 
-def build_vocab(all_words, output_filename):
+def vocab_construction(all_words, output_filename):
     vocab = Vocabulary()
     for word in all_words:
         vocab.add_word(word)
@@ -37,3 +39,14 @@ def build_vocab(all_words, output_filename):
 
     pickle.dump(vocab, open(output_filename, 'wb'))
     return
+
+def build_vocab_mimic():
+    all_icu_stay_dict = pickle.load(open('../Data/MIMIC/mimic_stay_dict.pkl','rb'))
+    all_codes = []
+    for icu_id in all_icu_stay_dict.keys():
+        for code in all_icu_stay_dict[icu_id].treatment:
+            all_codes.append(code)
+        for code in all_icu_stay_dict[icu_id].diagnosis:
+            all_codes.append(code)
+    all_codes = list(set(all_codes))
+    vocab_construction(all_codes, '../Data/MIMIC/vocab.pkl')

@@ -2,10 +2,7 @@ from .agem.agem import AGEM
 from .coral.coral import DeepCORAL
 from .ewc.ewc import EWC
 from .ft.ft import FT
-from .ftml.ftml import FTML
-from .foml.foml import FOML
 from .groupdro.groupdro import GroupDRO
 from .irm.irm import IRM
 from .si.si import SI
-from .toe.toe import TOE
-from .toe_ft.toe_ft import TOE_FT
+from .erm.erm import ERM

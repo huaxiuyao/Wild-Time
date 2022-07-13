@@ -6,11 +6,7 @@ import os
 import random
 import torch
 import torch.nn as nn
-from argparse import Namespace
 from torch import cuda
-from torchvision.models import resnet18
-
-from data.utils import get_simclr_pipeline_transform
 from get_dataset import get_dataset
 from methods.agem.agem import AGEM
 from methods.coral.coral import DeepCORAL
@@ -19,20 +15,20 @@ from methods.ft.ft import FT
 from methods.groupdro.groupdro import GroupDRO
 from methods.irm.irm import IRM
 from methods.si.si import SI
-from methods.toe.toe import TOE
+from methods.erm.erm import ERM
 from networks.drug import DTI_Encoder, DTI_Classifier
 from networks.article import ArticleNetwork
 from networks.fmow import FMoWNetwork
-from networks.weather import WeatherNetwork, FTTransformerConfig
+from networks.precipitation import PrecipitationNetwork
 from networks.yearbook import YearbookNetwork
 from networks.mimic import Transformer
 
 parser = argparse.ArgumentParser(description='Wild-Time')
 
-parser.add_argument('--dataset', default='yearbook', choices=['arxiv', 'clear', 'drug', 'huffpost', 'mimic', 'fmow', 'weather', 'yearbook'])
-parser.add_argument('--regression', dest='regression', action='store_true', help='regression task for weather or mimic datasets')
-parser.add_argument('--prediction_type', type=str, help='MIMIC: "mortality" or "readmission", Weather: "precipitation" or "temperature"')
-parser.add_argument('--method', default='ft', choices=['agem', 'coral', 'ensemble', 'ewc', 'ft', 'foml', 'ftml', 'groupdro', 'irm', 'si', 'toe', 'toe-ft'])
+parser.add_argument('--dataset', default='yearbook', choices=['arxiv', 'drug', 'huffpost', 'mimic', 'fmow', 'precipitation', 'yearbook'])
+parser.add_argument('--regression', dest='regression', action='store_true', help='regression task for mimic datasets')
+parser.add_argument('--prediction_type', type=str, help='MIMIC: "mortality" or "readmission", "precipitation"')
+parser.add_argument('--method', default='ft', choices=['agem', 'coral', 'ensemble', 'ewc', 'ft', 'groupdro', 'irm', 'si', 'erm'])
 parser.add_argument('--device', default=0, type=int, help='gpu id')
 parser.add_argument('--random_seed', default=1, type=int, help='random seed number')
 
@@ -42,7 +38,6 @@ parser.add_argument('--lr', default=0.01, type=float, help='the base learning ra
 parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
 parser.add_argument('--weight_decay', type=float, default=0.0, help='weight decay')
 parser.add_argument('--mini_batch_size', type=int, default=32, help='mini batch size for SGD')
-parser.add_argument('--test_time', dest='test_time', action='store_true', help='use MEMO for test-time adaptation')
 parser.add_argument('--test_update_iter', type=int, default=10, help='test-time adaptation iterations')
 parser.add_argument('--test_batch_size', type=int, default=32, help='batch size for test-time adaptation')
 
@@ -53,9 +48,9 @@ parser.add_argument('--split_time', type=int, help='timestep to split ID vs OOD'
 parser.add_argument('--eval_next_timesteps', default=1, type=int, help='number of future timesteps to evaluate on')
 parser.add_argument('--eval_worst_time', dest='eval_worst_time', action='store_true', help='evaluate worst timestep accuracy')
 parser.add_argument('--load_model', dest='load_model', action='store_true', help='load trained model for evaluation only')
-parser.add_argument('--eval_metric', default='acc', choices=['acc', 'f1', 'mae', 'rmse'])
+parser.add_argument('--eval_metric', default='acc', choices=['acc', 'f1', 'rmse'])
 
-# FT and TOE-FT
+# FT
 parser.add_argument('--K', default=1, type=int, help='number of previous timesteps to finetune on')
 
 # LISA and Mixup
@@ -87,31 +82,15 @@ parser.add_argument('--coral_lambda', type=float, default=1.0, help='how strong 
 parser.add_argument('--irm_lambda', type=float, default=1.0, help='how strong to weigh IRM penalty loss')
 parser.add_argument('--irm_penalty_anneal_iters', type=int, default=0, help='number of iterations after which we anneal IRM penalty loss')
 
-# FTML
-parser.add_argument('--meta_batch_size', default=4, type=int, help='number of tasks sampled per meta-update')
-parser.add_argument('--num_updates', default=5, type=int, help='number of inner gradient updates during training.')
-parser.add_argument('--num_updates_ft', default=20, type=int, help='number of inner gradient updates during finetuning.')
-parser.add_argument('--meta_lr', default=0.001, type=float, help='the base learning rate of the generator')
-parser.add_argument('--update_lr', default=0.01, type=float,
-                    help='step size alpha for inner gradient update.')  # 0.1 for omniglot
-parser.add_argument('--update_lr_ft', default=0.001, type=float,
-                    help='step size alpha for inner gradient update in ft process.')
-
-# FOML
-parser.add_argument('--num_online_updates', default=5, type=int, help='number of online updates during training.')
-parser.add_argument('--num_meta_updates', default=20, type=int, help='number of meta updates during finetuning.')
-parser.add_argument('--beta1', type=float, default=0.001, help='loss cofficient for online loss')
-parser.add_argument('--beta2', type=float, default=0.001, help='loss cofficient for meta loss')
-
 # SI
 parser.add_argument('--si_c', type=float, default=0.1, help='SI: regularisation strength')
 parser.add_argument('--epsilon', type=float, default=0.001, help='dampening parameter: bounds "omega" when squared parameter-change goes to 0')
 
 ## Logging, saving, and testing options
-parser.add_argument('--data_dir', default='/iris/u/cchoi1/Data', type=str, help='directory for datasets.')
-parser.add_argument('--log_dir', default='/iris/u/cchoi1/Temporal_Robustness/checkpoints', type=str,
+parser.add_argument('--data_dir', default='./Data', type=str, help='directory for datasets.')
+parser.add_argument('--log_dir', default='./checkpoints', type=str,
                     help='directory for summaries and checkpoints.')
-parser.add_argument('--results_dir', default='/iris/u/cchoi1/Temporal_Robustness/results', type=str,
+parser.add_argument('--results_dir', default='./results', type=str,
                     help='directory for summaries and checkpoints.')
 parser.add_argument('--num_workers', default=8, type=int, help='number of workers in data generator')
 
@@ -123,8 +102,6 @@ random.seed(args.random_seed)
 np.random.seed(args.random_seed)
 torch.cuda.manual_seed(args.random_seed)
 torch.manual_seed(args.random_seed)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
 
 device = 'cuda' if cuda.is_available() else 'cpu'
 
@@ -170,20 +147,9 @@ if __name__ == '__main__':
         network = nn.Sequential(featurizer, classifier).cuda()
         optimizer = torch.optim.Adam(network.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
-    elif args.dataset in ['clear']:
+    elif args.dataset in ['precipitation']:
         criterion = nn.CrossEntropyLoss(reduction=reduction).cuda()
-        network = resnet18(pretrained=False).cuda()
-        optimizer = torch.optim.SGD(network.parameters(), lr=args.lr, weight_decay=args.weight_decay, momentum=args.momentum)
-
-    elif args.dataset in ['weather']:
-        if args.regression:
-            criterion = nn.MSELoss(reduction=reduction).cuda()
-            # network = WeatherNetwork(args, num_input_channels=123, num_classes=1).cuda()
-            network = WeatherNetwork(args, num_classes=1).cuda()
-        else:
-            criterion = nn.CrossEntropyLoss(reduction=reduction).cuda()
-            # network = WeatherNetwork(args, num_input_channels=123, num_classes=dataset.num_classes).cuda()
-            network = WeatherNetwork(args, num_classes=9).cuda()
+        network = PrecipitationNetwork(args, num_classes=9).cuda()
         optimizer = torch.optim.Adam(network.parameters(), lr=args.lr)
 
     elif args.dataset in ['mimic']:
@@ -201,15 +167,12 @@ if __name__ == '__main__':
     elif args.dataset in ['arxiv', 'huffpost']:
         criterion = nn.CrossEntropyLoss(reduction=reduction).cuda()
         network = ArticleNetwork(num_classes=dataset.num_classes).cuda()
-        if args.method == 'foml':
-            optimizer = torch.optim.Adam(network.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-        else:
-            optimizer = torch.optim.AdamW(network.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+        optimizer = torch.optim.AdamW(network.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
     if args.method == 'ft':
         trainer = FT(args, dataset, network, criterion, optimizer, scheduler)
-    elif args.method == 'toe':
-        trainer = TOE(args, dataset, network, criterion, optimizer, scheduler)
+    elif args.method == 'erm':
+        trainer = ERM(args, dataset, network, criterion, optimizer, scheduler)
     elif args.method == 'groupdro':
         trainer = GroupDRO(args, dataset, network, criterion, optimizer, scheduler)
     elif args.method == 'ewc':
