@@ -1,13 +1,12 @@
 import os
-import sys
+import pickle
 from typing import List
 
-import ipdb
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
 from networks.mimic_vocab import Vocabulary, build_vocab_mimic
-import pickle
+
 
 def to_index(sequence, vocab, prefix='', suffix=''):
     """ convert code to index """

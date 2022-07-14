@@ -13,8 +13,6 @@ import os
 
 ID_HELD_OUT = 0.2
 
-import pickle
-
 
 def MIMICPreprocess(data, type):
     ENV = [i for i in list(range(2008, 2020))]

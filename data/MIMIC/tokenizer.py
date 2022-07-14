@@ -1,10 +1,8 @@
-import os
+import pickle
 from typing import List
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
-
-import pickle
 
 
 def to_index(sequence, vocab, prefix='', suffix=''):

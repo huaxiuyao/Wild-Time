@@ -2,7 +2,6 @@
 Reference: https://github.com/Google-Health/records-research/tree/master/graph-convolutional-transformer
 """
 
-import csv
 import pickle
 
 class MIMICStay:
