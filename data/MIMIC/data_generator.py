@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
+from data.MIMIC.preprocess import preprocess
 from data.utils import Mode
 
 class MIMICBase(Dataset):
@@ -13,8 +14,12 @@ class MIMICBase(Dataset):
 
         if args.data_dir is None:
             raise ValueError('Data directory not specified!')
-        PREPROCESSED_FILE = 'MIMIC/mimic_preprocessed_{}.pkl'.format(args.prediction_type)
+
+        PREPROCESSED_FILE = f'mimic_preprocessed_{args.prediction_type}.pkl'
         self.data_file = os.path.join(args.data_dir, PREPROCESSED_FILE)
+        if not os.path.isfile(self.data_file):
+            print(f'Preprocessing data and saving to {self.data_file}')
+            preprocess(args)
         self.datasets = pickle.load(open(self.data_file, 'rb'))
 
         self.args = args
@@ -49,11 +54,6 @@ class MIMICBase(Dataset):
                 self.input_dim.append((cumulative_batch_size, 3, 32, 32))
             else:
                 self.input_dim.append((min(self.mini_batch_size, self.num_examples[i]), 3, 32, 32))
-
-        # total_samples = 0
-        # for i in self.ENV:
-        #     total_samples += len(self.datasets[i][Mode.TEST_OOD]['labels'])
-        # print('total', total_samples)
 
     def update_historical(self, idx, data_del=False):
         time = self.ENV[idx]

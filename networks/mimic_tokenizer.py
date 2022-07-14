@@ -20,7 +20,7 @@ def to_index(sequence, vocab, prefix='', suffix=''):
 class MIMICTokenizer:
     def __init__(self):
         build_vocab_mimic()
-        self.vocab_dir = '../Data/MIMIC/vocab.pkl'
+        self.vocab_dir = './Data/vocab.pkl'
         if not os.path.exists(self.vocab_dir):
             build_vocab_mimic()
         self.code_vocabs, self.code_vocabs_size = self._load_code_vocabs()

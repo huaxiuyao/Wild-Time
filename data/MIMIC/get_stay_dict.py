@@ -32,7 +32,7 @@ class MIMICStay:
 
 def get_stay_dict():
     mimic_dict = {}
-    input_path = '../../Data/data_preprocessed.csv'
+    input_path = './data/MIMIC/processed/mimic4/data.csv'
     fboj = open(input_path)
     name_list = fboj.readline().strip().split(',')
     for eachline in fboj:
@@ -49,4 +49,4 @@ def get_stay_dict():
         mimic_value.treatment = tempdata['procedure'].split(' <sep> ')
         mimic_dict[tempdata['hadm_id']]=mimic_value
 
-    pickle.dump(mimic_dict, open('../../Data/MIMIC/mimic_stay_dict.pkl', 'wb'))
+    pickle.dump(mimic_dict, open('./Data/mimic_stay_dict.pkl', 'wb'))

@@ -21,13 +21,13 @@ class MIMICTokenizer:
         self.treatment_vocabs, self.treatment_vocabs_size = self._load_treatment_vocabs()
 
     def _load_diagnosis_vocabs(self):
-        vocab_dir = '../../Data/MIMIC/vocab_diagnosis.pkl'
+        vocab_dir = './Data/vocab_diagnosis.pkl'
         vocabs = pickle.load(open(vocab_dir))
         vocabs_size = len(vocabs)
         return vocabs, vocabs_size
 
     def _load_treatment_vocabs(self):
-        vocab_dir = '../../Data/MIMIC/vocab_treatment.pkl'
+        vocab_dir = './Data/vocab_treatment.pkl'
         vocabs = pickle.load(open(vocab_dir))
         vocabs_size = len(vocabs)
         return vocabs, vocabs_size

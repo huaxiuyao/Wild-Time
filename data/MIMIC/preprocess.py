@@ -7,7 +7,7 @@ import os
 
 import numpy as np
 import pickle
-from data.mimic.get_stay_dict import get_stay_dict
+from data.MIMIC.get_stay_dict import get_stay_dict
 from data.utils import Mode
 import os
 
@@ -64,12 +64,13 @@ def MIMICPreprocess(data, type):
 
         print(eachyear, datasets[eachyear][Mode.TRAIN]['labels'].shape, datasets[eachyear][Mode.TEST_ID]['labels'].shape)
 
-    with open('../../Data/MIMIC/mimic_preprocessed_{}.pkl'.format(type),'wb') as f:
+    with open('./Data/mimic_preprocessed_{}.pkl'.format(type),'wb') as f:
         pickle.dump(datasets, f)
 
-if __name__ == '__main__':
-    if not os.path.exists('../../Data/MIMIC/mimic_stay_dict.pkl'):
+
+def preprocess(args):
+    if not os.path.exists('./Data/mimic_stay_dict.pkl'):
         get_stay_dict()
-    data = pickle.load(open('../../Data/MIMIC/mimic_stay_dict.pkl', 'rb'))
+    data = pickle.load(open('./Data/mimic_stay_dict.pkl', 'rb'))
     MIMICPreprocess(data, 'readmission')
     MIMICPreprocess(data, 'mortality')
