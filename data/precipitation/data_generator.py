@@ -184,7 +184,6 @@ class Precipitation(PrecipitationBase):
         x = {}
         x['categorical'] = torch.from_numpy(np.array(categorical_data))
         x['continuous'] = torch.from_numpy(continuous_data)
-        # x['continuous'] = self.scaler.transform(x['continuous'])
         if self.regression:
             label = self.datasets[self.current_time][self.mode]['temperatures'][index]
             return x, torch.FloatTensor([label])

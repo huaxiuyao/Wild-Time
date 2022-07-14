@@ -9,12 +9,12 @@ from torch.utils.data import Dataset
 from wilds import get_dataset
 
 from data.fmow.preprocess import preprocess
-from data.utils import get_simclr_pipeline_transform, TwoCropsTransform, Mode
+from data.utils import Mode
 
 PREPROCESSED_FILE = 'fmow.pkl'
 
 class FMoWBase(Dataset):
-    def __init__(self, args, test_time_transform=None):
+    def __init__(self, args):
         super().__init__()
 
         if args.data_dir is None:
@@ -34,7 +34,6 @@ class FMoWBase(Dataset):
         self.root = dataset.root
 
         self.args = args
-        self.test_time_transform = test_time_transform
         self.num_classes = 62
         self.current_time = 0
         self.num_tasks = 17
@@ -64,11 +63,6 @@ class FMoWBase(Dataset):
             for classid in range(self.num_classes):
                 sel_idx = np.nonzero(self.datasets[year][self.mode]['labels'] == classid)[0]
                 self.class_id_list[classid][year] = sel_idx
-
-        # total_samples = 0
-        # for i in self.ENV:
-        #     total_samples += len(self.datasets[i][Mode.TEST_OOD]['labels'])
-        # print('total', total_samples)
 
     def __getitem__(self, idx):
         pass
@@ -133,12 +127,8 @@ class FMoW(FMoWBase):
     def __getitem__(self, idx):
         image_tensor = self.transform(self.get_input(idx))
         label = self.datasets[self.current_time][self.mode]['labels'][idx]
-        if self.test_time_transform is not None:
-            two_transforms = TwoCropsTransform(base_transform=get_simclr_pipeline_transform(size=self.resolution))
-            tensor_to_PIL = transforms.ToPILImage()
-            return two_transforms(tensor_to_PIL(image_tensor)), torch.LongTensor([label])
-        else:
-            return image_tensor, torch.LongTensor([label])
+
+        return image_tensor, torch.LongTensor([label])
 
     def __len__(self):
         return len(self.datasets[self.current_time][self.mode]['labels'])

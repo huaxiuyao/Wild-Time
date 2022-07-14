@@ -1,7 +1,6 @@
 import os
 import pickle
 
-import ipdb
 import numpy as np
 import torch
 from torch.utils.data import Dataset
@@ -57,11 +56,6 @@ class ArXivBase(Dataset):
                 self.input_dim.append(cumulative_batch_size)
             else:
                 self.input_dim.append(min(self.mini_batch_size, num_examples))
-
-        # total_samples = 0
-        # for i in self.ENV:
-        #     total_samples += len(self.datasets[i][Mode.TEST_OOD]['category'])
-        # print('total', total_samples)
 
     def update_historical(self, idx, data_del=False):
         time = self.ENV[idx]

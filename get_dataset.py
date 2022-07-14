@@ -33,10 +33,10 @@ def get_dataset(dataset: str, args):
 
     elif dataset == 'mimic':
         if args.method in ['coral', 'groupdro', 'irm']:
-            from data.mimic.data_generator import MIMICGroup
+            from data.MIMIC.data_generator import MIMICGroup
             return MIMICGroup(args)
         else:
-            from data.mimic.data_generator import MIMIC
+            from data.MIMIC.data_generator import MIMIC
             return MIMIC(args)
 
     elif dataset == 'precipitation':

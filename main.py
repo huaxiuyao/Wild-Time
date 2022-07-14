@@ -1,27 +1,27 @@
 import argparse
-import copy
-
-import numpy as np
 import os
 import random
+
+import numpy as np
 import torch
 import torch.nn as nn
 from torch import cuda
+
 from get_dataset import get_dataset
 from methods.agem.agem import AGEM
 from methods.coral.coral import DeepCORAL
+from methods.erm.erm import ERM
 from methods.ewc.ewc import EWC
 from methods.ft.ft import FT
 from methods.groupdro.groupdro import GroupDRO
 from methods.irm.irm import IRM
 from methods.si.si import SI
-from methods.erm.erm import ERM
-from networks.drug import DTI_Encoder, DTI_Classifier
 from networks.article import ArticleNetwork
+from networks.drug import DTI_Encoder, DTI_Classifier
 from networks.fmow import FMoWNetwork
+from networks.mimic import Transformer
 from networks.precipitation import PrecipitationNetwork
 from networks.yearbook import YearbookNetwork
-from networks.mimic import Transformer
 
 parser = argparse.ArgumentParser(description='Wild-Time')
 

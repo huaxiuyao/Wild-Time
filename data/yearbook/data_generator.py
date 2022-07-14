@@ -3,16 +3,15 @@ import pickle
 
 import numpy as np
 import torch
-import torchvision.transforms as transforms
 from torch.utils.data import Dataset
 
-from data.utils import get_simclr_pipeline_transform, TwoCropsTransform, Mode
+from data.utils import Mode
 from data.yearbook.preprocess import preprocess
 
 PREPROCESSED_FILE = 'yearbook.pkl'
 
 class YearbookBase(Dataset):
-    def __init__(self, args, test_time_transform=None):
+    def __init__(self, args):
         super().__init__()
 
         if args.data_dir is None:
@@ -28,7 +27,6 @@ class YearbookBase(Dataset):
         self.current_time = 0
         self.resolution = 32
         self.mini_batch_size = args.mini_batch_size
-        self.test_time_transform = test_time_transform
         self.mode = Mode.TRAIN
 
         self.ENV = list(sorted(self.datasets.keys()))
@@ -119,12 +117,7 @@ class Yearbook(YearbookBase):
         image_tensor = torch.FloatTensor(image).permute(2, 0, 1)
         label_tensor = torch.LongTensor([label])
 
-        if self.test_time_transform is not None:
-            two_transforms = TwoCropsTransform(base_transform=get_simclr_pipeline_transform(size=self.resolution))
-            tensor_to_PIL = transforms.ToPILImage()
-            return two_transforms(tensor_to_PIL(image_tensor)), label_tensor
-        else:
-            return image_tensor, label_tensor
+        return image_tensor, label_tensor
 
     def __len__(self):
         return len(self.datasets[self.current_time][self.mode]['labels'])

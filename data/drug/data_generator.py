@@ -3,14 +3,12 @@
 
 import os
 
-import ipdb
 import torch
 import numpy as np
 import pandas as pd
 import pickle
-from torch.utils.data import Dataset, DataLoader
 from copy import deepcopy
-from data.utils import get_simclr_pipeline_transform, TwoCropsTransform, Mode
+from data.utils import Mode
 
 ID_HELD_OUT = 0.1
 
