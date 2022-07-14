@@ -17,7 +17,7 @@ If you find this repository useful in your research, please cite the following p
   year={2022},
 }
 ```
-We will release the paper on arXiv, along with the final code repository, in 1-2 months.
+We will release the arXiv version of our paper, along with the final code repository, in 1-2 months.
 
 ## Prerequisites
 
