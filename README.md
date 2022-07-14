@@ -1,5 +1,4 @@
-# Wild-Time
-Benchmark for Natural Temporal Distribution Shift
+# Wild-Time: A Benchmark of in-the-Wild Distribution Shift over Time
 
 **Note**: This is a preliminary version of Wild-Time benchmark, we are working on code refactoring and will release the final version in 1-2 months.
 
