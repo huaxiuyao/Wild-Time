@@ -28,18 +28,22 @@ We will release the arXiv version of our paper, along with the final code reposi
 - PyTDC 0.3.6
 - pytorch-lightning 1.5.9
 - pytorch 1.11.0
+- numpy 
 
-## Datasets and Scripts
-
+## Datasets
 
 - MIMIC-IV
   - Follow the instructions in `../src/data/mimic/get_mimic_table.ipynb` to download the datasets and get `data_preprocessed.csv`
   - Run `../src/data/mimic/preprocess.py` to get `mimic_preprocessed_readmission.pkl` and `mimic_preprocessed_mortality.pkl`
-  - Refer to the corresponding running scripts in the `scripts/` folder
 
 - All other datasets (Yearbook, arXiv, Huffpost, Drug-BA, Weather-Pcpn):
   - Download the data from [Google Drive](https://drive.google.com/drive/folders/178Os-zwyJ7yL7aBxcR7Il5_0wwiYYqGl?usp=sharing) into the folder `./Data`
-  - Refer to the corresponding scripts in the `scripts/` folder
+
+## Scripts
+
+- Create the folders `./Data`, `./checkpoints`, and `./results`.
+- To run baselines, refer to the corresponding scripts in the `scripts/` folder.
 
 ## Acknowledgement
+
 We thank the authors of all baselines. Most of our implementations follow the corresponding original released versions. We gratefully acknowledge the help of Zhenbang Wu in the preprocessing of MIMIC-IV dataset.
