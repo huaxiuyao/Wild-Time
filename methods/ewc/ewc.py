@@ -169,9 +169,6 @@ class EWC(BaseTrainer):
             loss = loss + self.ewc_lambda * self.ewc_loss()
             loss_all.append(loss.item())
 
-            if step % 50 == 0:
-                print('step: {}, loss: {}'.format(step, np.mean(loss_all)))
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()

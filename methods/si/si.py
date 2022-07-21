@@ -92,10 +92,6 @@ class SI(BaseTrainer):
             loss = loss + self.si_c * self.surrogate_loss()
             loss_all.append(loss.item())
 
-            # if step % 50 == 0:
-                # print('step: {}, loss: {}'.format(step, np.mean(loss_all)))
-                # print(self.surrogate_loss())
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()

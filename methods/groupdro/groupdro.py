@@ -35,9 +35,6 @@ class GroupDRO(BaseTrainer):
             loss = self.loss_computer.loss(logits, y, g, is_training=True)
             loss_all.append(loss.item())
 
-            # if step % 100 == 0 and step != 0:
-            #     print('step: {}, loss: {}'.format(step, np.mean(loss_all)))
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()

@@ -64,9 +64,6 @@ class DeepCORAL(BaseTrainer):
             loss.backward()
             self.optimizer.step()
 
-            if step % 200 == 0 and step != 0:
-                print('step: {}, loss: {}'.format(step, np.mean(loss_all)))
-
             if step == self.train_update_iter:
                 if self.scheduler is not None:
                     self.scheduler.step()
